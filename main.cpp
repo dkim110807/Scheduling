@@ -232,8 +232,10 @@ int main() {
             Block V = B;
             int64_t L = t(V);
             std::vector<std::array<int64_t, 3>> U;
+
             std::vector<int64_t> Delta; // \Delta
             std::vector<std::array<int64_t, 2>> Lambda; // \Lambda
+            std::vector<std::array<int64_t, 2>> lambda; // \lambda
             std::vector<std::vector<std::array<int64_t, 2>>> delta; // Representing \delta_{i}
 
             // Step 2.
@@ -255,20 +257,40 @@ int main() {
 
                         size_t start = H[j + 1].size();
 
-
+                        Delta.push_back(0);
+                        delta.push_back({});
 
                         // V is sorted in ERD rule therefore no need for extra sorting
-                        for (size_t i = 0, k = 0; i < n; i = k) {
+                        for (size_t i = 0, k = 0; i < V.size(); i = k) {
                             Block B(p);
                             if (k == ju[2]) k++;
                             B.push_back(jobs[k]);
-                            for (k++; k < n; k++) {
+                            for (k++; k < V.size(); k++) {
                                 if (k == ju[2]) k++;
                                 if (t(B) > jobs[k][0]) {
                                     B.push_back(jobs[k]);
                                 } else break;
                             }
                             H[j + 1].push_back(B);
+                            if (i == 0) {
+                                int64_t left = r(V), right = r(B);
+                                delta[u].push_back({left, right});
+                                Delta[u] += right - left;
+                            } else {
+                                int64_t left = r(H[j + 1][H[j + 1].size() - 2]), right = r(B);
+                                delta[u].push_back({left, right});
+                                Delta[u] += right - left;
+                            }
+                        }
+
+                        {
+                            int64_t left = r(H[j + 1].back()), right = t(B);
+                            lambda.push_back({left, right});
+                            if (u == 0) Lambda.push_back({left, right});
+                            else {
+                                right = Lambda[u - 1][1];
+                                Lambda.push_back({left, right});
+                            }
                         }
 
                         V = H[j + 1].back();
@@ -287,7 +309,7 @@ int main() {
                             }
                             H[j + 1].push_back(V);
                             break;
-                        } else if (false) { // Todo.
+                        } else if (Delta[u] == 0) {
                             break;
                         } else {
                             u = u + 1;
