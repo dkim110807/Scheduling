@@ -242,7 +242,7 @@ int main() {
                         V = H[j + 1].back();
                         H[j + 1].pop_back();
                     } else {
-                        std::array<int64_t, 3> ju{-1, -1, -1};
+                        std::array<int64_t, 3> ju{-1, -1, -1};  // j_{u}, LDD rule
                         // find the job j_{u} by the LDD rule
                         for (size_t i = 0; i < V.size(); i++) {
                             if (V[i][1] > ju[1]) ju = V[i];
@@ -282,7 +282,7 @@ int main() {
                             }
                             H[j + 1].push_back(V);
                             break;
-                        } else if (true) { // Todo.
+                        } else if (false) { // Todo.
                             break;
                         } else {
                             u = u + 1;
@@ -318,6 +318,7 @@ int main() {
                     // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
                     for (int i = 0; i < U.size(); i++) {
                         if (i == k) continue;
+
                     }
                     // Schedule j_{k} within the rest \Delta and [t(V), L]
                 }
