@@ -22,8 +22,8 @@ public:
     }
 
     [[nodiscard]]
-    int size() const {
-        return (int) v.size();
+    size_t size() const {
+        return v.size();
     }
 
     [[nodiscard]]
@@ -35,7 +35,7 @@ public:
         v.push_back(job);
     }
 
-    std::array<int64_t, 3> &operator[](int i) {
+    std::array<int64_t, 3> &operator[](size_t i) {
         if (i >= size() || i <= 0) {
             throw std::out_of_range("Index range must be [0, " + std::to_string(size() - 1)
                                     + "] but found " + std::to_string(i) + "!");
@@ -65,8 +65,8 @@ public:
 #ifdef LOCAL
 
     friend std::string to_string(const Block &b) {
-
-        return "";
+        std::string s = to_string(b.v);
+        return s;
     }
 
 #endif
@@ -94,8 +94,6 @@ int main() {
         jobs[i][2] = i;
     }
 
-    debug(jobs);
-
     /*
      * Algorithm SMPP-ELJTT (SMPP, Equal-length jobs, total tardiness)
      *
@@ -122,19 +120,29 @@ int main() {
         return a[0] < b[0];     // a[0] stands for the release date
     });
 
-    Block b = Block(p);
-    b.push_back(jobs[0]);
-    H[0].push_back(b);
+    debug(jobs);
+
+    // Make the initial blocks
+    for (size_t i = 0, j = 0; i < n; i = j) {
+        Block B(p);
+        B.push_back(jobs[j]);
+        for (j++; j < n; j++) {
+            if (t(B) > jobs[j][0]) {
+                B.push_back(jobs[j]);
+            } else break;
+        }
+        H[0].push_back(B);
+    }
+
     debug(H[0]);
 
-    debug(r(H[0][0]));
-
-    for (int j = 0; j < n; j++) {
+    std::vector<std::array<int64_t, 3>> schedule;
+    for (size_t j = 0; j < n; j++) {
         if (H[j].empty()) break;
-        for (int i = 0; i < H[j].size(); i++) {
+        for (size_t i = 0; i < H[j].size(); i++) {
             auto &B = H[j][i];  // The block (subblock) that we are currently working on
             if (B.size() == 1) {    // Case 1. Schedule the unique job in the interval
-
+                schedule.push_back({B[i][0], B[i][1], B[i][2]});
                 continue;
             }
 
@@ -166,6 +174,24 @@ int main() {
      *        end if
      * 3. Set k = u
      *    while L - t(V) > p:
-     *
+     *        Schedule job j_{k} within [L - p, L]
+     *        Remove j_k from U
+     *        Reset L = L - p
+     *        while U \neq = {}
+     *            Re-index the jobs in U as j_1, ..., j_{U} by the ERD rule
+     *            Set u = |U| and \Lambda = 0
+     *            for k = 1, ..., u:
+     *                \Lambda = \Lambda + \lambda_{k}
+     *                if d_{j_{k}} < t(V):
+     *                    break from all loops and goto Step 2
+     *                else if d_{j_{k}} \geq L - \Lambda:
+     *                    break
+     *                end
+     *            if min{\Lambda, L - t(V)} > p:
+     *                break
+     *            else if \Lambda \geq L - t(V):
+     *                break from all loops and goto Step 4.
+     *            else:
+     *                Schedule {j_{1}, ..., j_{k}} within
      */
 }
