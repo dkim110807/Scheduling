@@ -1,8 +1,9 @@
 #include <array>
 #include <algorithm>
+#include <cassert>
+#include <functional>
 #include <iostream>
 #include <vector>
-#include <functional>
 
 #ifdef LOCAL
 
@@ -254,8 +255,9 @@ int main() {
             };
 
             // Step 3.
+            size_t k = -1;
             std::function<void()> step3 = [&]() -> void {
-                size_t k = u;
+                k = u;
                 while (L - t(V) > p) {
                     /* ToDo.
                      * Schedule job j_{k} within [L - p, L]
@@ -270,7 +272,14 @@ int main() {
 
             // Step 4.
             std::function<void()> step4 = [&]() -> void {
-
+                if (!optimal[V[0][2]]) {
+                    for (size_t i = 0; i < V.size(); i++) {
+                        optimal[V[i][2]] = true;
+                    }
+                    H[j + 1].push_back(V);
+                } else {
+                    // Schedule {j_{1}, ..., j_{k}} within
+                }
             };
 
             step2();
@@ -286,6 +295,8 @@ int main() {
     );
 
     debug(schedule);
+
+    assert(schedule.size() <= 10 * n);
 
     // The output is 1 based idx
     for (const auto &[s, e, idx]: schedule) {
