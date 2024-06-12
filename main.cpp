@@ -228,7 +228,7 @@ int main() {
             }
 
             // Block decomposition
-            size_t u = 0;
+            size_t u = 0;   // 0-based index
             Block V = B;
             int64_t L = t(V);
             std::vector<std::array<int64_t, 3>> U;
@@ -277,6 +277,9 @@ int main() {
 
                         if (d(ju) >= t(V)) {
                             // Declare V to be optimal
+                            for (size_t i = 0; i < V.size(); i++) {
+                                optimal[V[i][2]] = true;
+                            }
                             H[j + 1].push_back(V);
                             break;
                         } else if (true) { // Todo.
