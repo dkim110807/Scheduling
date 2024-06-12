@@ -318,6 +318,8 @@ int main() {
                 }
             };
 
+            std::function<void()> step4;
+
             // Step 3.
             size_t k = -1;
             std::function<void()> step3 = [&]() -> void {
@@ -335,7 +337,7 @@ int main() {
             };
 
             // Step 4.
-            std::function<void()> step4 = [&]() -> void {
+            step4 = [&]() -> void {
                 if (!optimal[V[0][2]]) {
                     for (size_t i = 0; i < V.size(); i++) {
                         optimal[V[i][2]] = true;
