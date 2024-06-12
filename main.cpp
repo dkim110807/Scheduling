@@ -232,6 +232,9 @@ int main() {
             Block V = B;
             int64_t L = t(V);
             std::vector<std::array<int64_t, 3>> U;
+            std::vector<int64_t> Delta; // \Delta
+            std::vector<std::array<int64_t, 2>> Lambda; // \Lambda
+            std::vector<std::vector<std::array<int64_t, 2>>> delta; // Representing \delta_{i}
 
             // Step 2.
             std::function<void()> step2 = [&]() -> void {
