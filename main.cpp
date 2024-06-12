@@ -39,7 +39,7 @@ public:
     }
 
     std::array<int64_t, 3> &operator[](size_t i) {
-        if (i >= size() || i <= 0) {
+        if (i >= size() || i < 0) {
             throw std::out_of_range("Index range must be [0, " + std::to_string(size() - 1)
                                     + "] but found " + std::to_string(i) + "!");
         }
@@ -215,7 +215,7 @@ int main() {
         for (size_t i = 0; i < H[j].size(); i++) {
             Block &B = H[j][i];  // The block (subblock) that we are currently working on
             if (B.size() == 1) {    // Case 1. Schedule the unique job in the interval
-                schedule.push_back({B[i][0], B[i][1], B[i][2]});
+                schedule.push_back({B[0][0], B[0][0] + p, B[0][2]});
                 continue;
             }
 
@@ -278,7 +278,9 @@ int main() {
                     }
                     H[j + 1].push_back(V);
                 } else {
-                    // Schedule {j_{1}, ..., j_{k}} within
+                    // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
+
+                    // Schedule j_{k} within the rest \Delta and [t(V), L]
                 }
             };
 
