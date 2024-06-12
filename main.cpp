@@ -24,6 +24,8 @@ public:
 
     }
 
+    ~Block() = default;
+
     [[nodiscard]]
     size_t size() const {
         return v.size();
@@ -230,7 +232,7 @@ int main() {
                 while (u < n) {
                     if (V.size() == 1) {
                         U.push_back(V[0]);
-                        // ToDo. reset t(V) to be the ending time of the second last subblock
+                        // Todo. reset t(V) to be the ending time of the second last subblock
                     } else {
                         std::array<int64_t, 3> ju{-1, -1, -1};
                         // find the job j_{u} by the LDD rule
@@ -241,11 +243,21 @@ int main() {
                         debug(ju);
 
                         // V is sorted in ERD rule therefore no need for extra sorting
+                        for (size_t i = 0, j = 0; i < n; i = j) {
+                            Block B(p);
+                            B.push_back(jobs[j]);
+                            for (j++; j < n; j++) {
+                                if (t(B) > jobs[j][0]) {
+                                    B.push_back(jobs[j]);
+                                } else break;
+                            }
+                            H[0].push_back(B);
+                        }
 
                         if (d(ju) >= t(V)) {
 
                             break;
-                        } else if (true) {
+                        } else if (true) { // Todo.
                             break;
                         } else {
                             u = u + 1;
@@ -259,7 +271,7 @@ int main() {
             std::function<void()> step3 = [&]() -> void {
                 k = u;
                 while (L - t(V) > p) {
-                    /* ToDo.
+                    /* Todo.
                      * Schedule job j_{k} within [L - p, L]
                      * Remove j_{k} from U
                      * Reset L = L - p
@@ -288,6 +300,7 @@ int main() {
             step3();
             step4();
         }
+        H[j].clear();
     }
 
     std::sort(schedule.begin(), schedule.end(),
