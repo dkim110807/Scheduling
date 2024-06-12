@@ -229,22 +229,23 @@ int main() {
 
             // Block decomposition
             size_t u = 0;
-            Block *V = &B;
-            int64_t L = t(*V);
+            Block V = B;
+            int64_t L = t(V);
             std::vector<std::array<int64_t, 3>> U;
 
             // Step 2.
             std::function<void()> step2 = [&]() -> void {
                 while (u < n) {
-                    if (V->size() == 1) {
-                        U.push_back((*V)[0]);
+                    if (V.size() == 1) {
+                        U.push_back((V)[0]);
                         assert(!H[j + 1].empty());
-                        V = &H[j + 1].back();
+                        V = H[j + 1].back();
+                        H[j + 1].pop_back();
                     } else {
                         std::array<int64_t, 3> ju{-1, -1, -1};
                         // find the job j_{u} by the LDD rule
-                        for (size_t i = 0; i < V->size(); i++) {
-                            if ((*V)[i][1] > ju[1]) ju = (*V)[i];
+                        for (size_t i = 0; i < V.size(); i++) {
+                            if (V[i][1] > ju[1]) ju = V[i];
                         }
 
                         debug(ju);
@@ -265,11 +266,18 @@ int main() {
                             H[j + 1].push_back(B);
                         }
 
-                        V = &H[j + 1].back();
+                        V = H[j + 1].back();
                         H[j + 1].pop_back();
 
-                        if (d(ju) >= t(*V)) {
+                        for (size_t i = start; i < H[j + 1].size(); i++) {
+                            for (size_t k = 0; k < H[j + 1][start].size(); k++) {
+                                optimal[H[j + 1][start][k][2]] = true;
+                            }
+                        }
+
+                        if (d(ju) >= t(V)) {
                             // Declare V to be optimal
+                            H[j + 1].push_back(V);
                             break;
                         } else if (true) { // Todo.
                             break;
@@ -284,7 +292,7 @@ int main() {
             size_t k = -1;
             std::function<void()> step3 = [&]() -> void {
                 k = u;
-                while (L - t(*V) > p) {
+                while (L - t(V) > p) {
                     /* Todo.
                      * Schedule job j_{k} within [L - p, L]
                      * Remove j_{k} from U
@@ -298,11 +306,11 @@ int main() {
 
             // Step 4.
             std::function<void()> step4 = [&]() -> void {
-                if (!optimal[(*V)[0][2]]) {
-                    for (size_t i = 0; i < V->size(); i++) {
-                        optimal[(*V)[i][2]] = true;
+                if (!optimal[V[0][2]]) {
+                    for (size_t i = 0; i < V.size(); i++) {
+                        optimal[V[i][2]] = true;
                     }
-                    H[j + 1].push_back(*V);
+                    H[j + 1].push_back(V);
                 } else {
                     // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
 
