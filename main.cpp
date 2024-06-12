@@ -323,14 +323,36 @@ int main() {
             size_t k = -1;
             std::function<void()> step3 = [&]() -> void {
                 k = u;
+                int break_all_loops = 0;
                 while (L - t(V) > p) {
                     // Schedule job j_{k} within [L - p, L]
                     schedule.push_back({L - p, L, U[k][2]});
+                    // Remove j_{k} from U
+                    U.pop_back();
+                    // Reset L = L - p
                     L = L - p;
+                    std::sort(U.begin(), U.end(),
+                              [&](const std::array<int64_t, 3> &a, const std::array<int64_t, 3> &b) -> bool {
+                                  return a[0] < b[0];
+                              }
+                    );
                     while (!U.empty()) {
-
+                        u = U.size();
+                        int64_t sum_lambda = 0;
+                        for (size_t l = 0; l < u; l++) {
+                            sum_lambda = sum_lambda + lambda[l][1] - lambda[l][0];
+                            if (d(U[l]) < t(V)) {
+                                // break from all loops and goto Step 2
+                                break_all_loops = 2;
+                                break;
+                            }
+                        }
+                        if (break_all_loops > 0) break;
                     }
+                    if (break_all_loops > 0) break;
                 }
+                if (break_all_loops == 2) step2();
+                if (break_all_loops == 4) step4();
             };
 
             // Step 4.
