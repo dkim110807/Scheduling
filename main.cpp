@@ -332,23 +332,23 @@ int main() {
                     // Reset L = L - p
                     L = L - p;
 
-                    // Make the
-                    std::sort(U.begin(), U.end(),
-                              [&](const std::array<int64_t, 3> &a, const std::array<int64_t, 3> &b) -> bool {
-                                  return a[0] < b[0];
-                              }
-                    );
-
                     while (!U.empty()) {
+                        // Make the ERD
+                        std::sort(U.begin(), U.end(),
+                                  [&](const std::array<int64_t, 3> &a, const std::array<int64_t, 3> &b) -> bool {
+                                      return a[0] < b[0];
+                                  }
+                        );
+
                         u = U.size();
                         int64_t sum_lambda = 0;
-                        for (size_t l = 0; l < u; l++) {
-                            sum_lambda = sum_lambda + lambda[l][1] - lambda[l][0];
-                            if (d(U[l]) < t(V)) {
+                        for (k = 0; k < u; k++) {
+                            sum_lambda = sum_lambda + lambda[k][1] - lambda[k][0];
+                            if (d(U[k]) < t(V)) {
                                 // break from all loops and goto Step 2
                                 break_all_loops = 2;
                                 break;
-                            } else if (d(U[l]) >= L - sum_lambda) {
+                            } else if (d(U[k]) >= L - sum_lambda) {
                                 break;
                             }
                         }
@@ -358,7 +358,17 @@ int main() {
                             break_all_loops = 4;
                             break;
                         } else {
-                            //
+                            // Schedule {j_{1}, ..., j_{k}} within \bigcup_{l = 1}^{k} \Delta_{j} and [L - \Lambda, L] by ERD rule
+                            int64_t left = p, start = 0;
+                            for (size_t l = 0; l <= k; l++) {
+
+                            }
+
+                            // Remove {j_{1}, ..., j_{k}} from U
+                            for (size_t l = k + 1; l < U.size(); l++) {
+                                U[l - k - 1] = U[l];
+                            }
+                            U.resize(U.size() - k);
                         }
                         if (break_all_loops > 0) break;
                     }
