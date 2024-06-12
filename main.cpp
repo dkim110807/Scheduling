@@ -26,11 +26,7 @@ public:
 
     ~Block() = default;
 
-    Block operator=(const Block &b) {
-        p = b.p;
-
-        return b;
-    }
+    Block &operator=(const Block &b) = default;
 
     [[nodiscard]]
     size_t size() const {
@@ -316,6 +312,9 @@ int main() {
                         }
                     }
                 }
+
+                debug(delta);
+                debug(lambda);
             };
 
             std::function<void()> step4;
@@ -325,11 +324,9 @@ int main() {
             std::function<void()> step3 = [&]() -> void {
                 k = u;
                 while (L - t(V) > p) {
-                    /* Todo.
-                     * Schedule job j_{k} within [L - p, L]
-                     * Remove j_{k} from U
-                     * Reset L = L - p
-                     */
+                    // Schedule job j_{k} within [L - p, L]
+                    schedule.push_back({L - p, L, U[k][2]});
+                    L = L - p;
                     while (!U.empty()) {
 
                     }
