@@ -15,7 +15,7 @@
 
 class Block {
 public:
-    const int64_t p;
+    int64_t p;
 
     // containing jobs (release, deadline, idx)
     std::vector<std::array<int64_t, 3>> v;
@@ -25,6 +25,12 @@ public:
     }
 
     ~Block() = default;
+
+    Block operator=(const Block &b) {
+        p = b.p;
+
+        return b;
+    }
 
     [[nodiscard]]
     size_t size() const {
@@ -223,39 +229,47 @@ int main() {
 
             // Block decomposition
             size_t u = 0;
-            Block &V = B;
-            int64_t L = t(V);
+            Block *V = &B;
+            int64_t L = t(*V);
             std::vector<std::array<int64_t, 3>> U;
 
             // Step 2.
             std::function<void()> step2 = [&]() -> void {
                 while (u < n) {
-                    if (V.size() == 1) {
-                        U.push_back(V[0]);
-                        // Todo. reset t(V) to be the ending time of the second last subblock
+                    if (V->size() == 1) {
+                        U.push_back((*V)[0]);
+                        assert(!H[j + 1].empty());
+                        V = &H[j + 1].back();
                     } else {
                         std::array<int64_t, 3> ju{-1, -1, -1};
                         // find the job j_{u} by the LDD rule
-                        for (size_t i = 0; i < V.size(); i++) {
-                            if (V[i][1] > ju[1]) ju = V[i];
+                        for (size_t i = 0; i < V->size(); i++) {
+                            if ((*V)[i][1] > ju[1]) ju = (*V)[i];
                         }
 
                         debug(ju);
 
+                        size_t start = H[j + 1].size();
+
                         // V is sorted in ERD rule therefore no need for extra sorting
-                        for (size_t i = 0, j = 0; i < n; i = j) {
+                        for (size_t i = 0, k = 0; i < n; i = k) {
                             Block B(p);
-                            B.push_back(jobs[j]);
-                            for (j++; j < n; j++) {
-                                if (t(B) > jobs[j][0]) {
-                                    B.push_back(jobs[j]);
+                            if (k == ju[2]) k++;
+                            B.push_back(jobs[k]);
+                            for (k++; k < n; k++) {
+                                if (k == ju[2]) k++;
+                                if (t(B) > jobs[k][0]) {
+                                    B.push_back(jobs[k]);
                                 } else break;
                             }
-                            H[0].push_back(B);
+                            H[j + 1].push_back(B);
                         }
 
-                        if (d(ju) >= t(V)) {
+                        V = &H[j + 1].back();
+                        H[j + 1].pop_back();
 
+                        if (d(ju) >= t(*V)) {
+                            // Declare V to be optimal
                             break;
                         } else if (true) { // Todo.
                             break;
@@ -270,7 +284,7 @@ int main() {
             size_t k = -1;
             std::function<void()> step3 = [&]() -> void {
                 k = u;
-                while (L - t(V) > p) {
+                while (L - t(*V) > p) {
                     /* Todo.
                      * Schedule job j_{k} within [L - p, L]
                      * Remove j_{k} from U
@@ -284,11 +298,11 @@ int main() {
 
             // Step 4.
             std::function<void()> step4 = [&]() -> void {
-                if (!optimal[V[0][2]]) {
-                    for (size_t i = 0; i < V.size(); i++) {
-                        optimal[V[i][2]] = true;
+                if (!optimal[(*V)[0][2]]) {
+                    for (size_t i = 0; i < V->size(); i++) {
+                        optimal[(*V)[i][2]] = true;
                     }
-                    H[j + 1].push_back(V);
+                    H[j + 1].push_back(*V);
                 } else {
                     // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
 
