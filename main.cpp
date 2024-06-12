@@ -74,6 +74,14 @@ public:
 #endif
 };
 
+int64_t r(const std::array<int64_t, 3> &j) {
+    return j[0];
+}
+
+int64_t d(const std::array<int64_t, 3> &j) {
+    return j[1];
+}
+
 /*
  * An O(n^2) algorithm for scheduling equal-length preemptive jobs on a single machine to minimize total tardiness
  * - Zhongjun Tian, C.T.Ng, T.C.E. Cheng
@@ -226,7 +234,20 @@ int main() {
                         std::array<int64_t, 3> ju{-1, -1, -1};
                         // find the job j_{u} by the LDD rule
                         for (size_t i = 0; i < V.size(); i++) {
+                            if (V[i][1] > ju[1]) ju = V[i];
+                        }
 
+                        debug(ju);
+
+                        // V is sorted in ERD rule therefore no need for extra sorting
+
+                        if (d(ju) >= t(V)) {
+
+                            break;
+                        } else if (true) {
+                            break;
+                        } else {
+                            u = u + 1;
                         }
                     }
                 }
@@ -236,7 +257,14 @@ int main() {
             std::function<void()> step3 = [&]() -> void {
                 size_t k = u;
                 while (L - t(V) > p) {
+                    /* ToDo.
+                     * Schedule job j_{k} within [L - p, L]
+                     * Remove j_{k} from U
+                     * Reset L = L - p
+                     */
+                    while (!U.empty()) {
 
+                    }
                 }
             };
 
@@ -244,6 +272,10 @@ int main() {
             std::function<void()> step4 = [&]() -> void {
 
             };
+
+            step2();
+            step3();
+            step4();
         }
     }
 
