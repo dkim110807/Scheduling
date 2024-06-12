@@ -331,11 +331,14 @@ int main() {
                     U.pop_back();
                     // Reset L = L - p
                     L = L - p;
+
+                    // Make the
                     std::sort(U.begin(), U.end(),
                               [&](const std::array<int64_t, 3> &a, const std::array<int64_t, 3> &b) -> bool {
                                   return a[0] < b[0];
                               }
                     );
+
                     while (!U.empty()) {
                         u = U.size();
                         int64_t sum_lambda = 0;
@@ -345,7 +348,17 @@ int main() {
                                 // break from all loops and goto Step 2
                                 break_all_loops = 2;
                                 break;
+                            } else if (d(U[l]) >= L - sum_lambda) {
+                                break;
                             }
+                        }
+                        if (std::min(sum_lambda, L - t(V)) > p) {
+                            break;
+                        } else if (sum_lambda >= L - t(V)) {
+                            break_all_loops = 4;
+                            break;
+                        } else {
+                            //
                         }
                         if (break_all_loops > 0) break;
                     }
