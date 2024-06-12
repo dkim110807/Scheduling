@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <functional>
 
 #ifdef LOCAL
 
@@ -15,6 +16,7 @@ class Block {
 public:
     const int64_t p;
 
+    // containing jobs (release, deadline, idx)
     std::vector<std::array<int64_t, 3>> v;
 
     explicit Block(int64_t p = 0) : p(p) {
@@ -137,17 +139,6 @@ int main() {
     debug(H[0]);
 
     std::vector<std::array<int64_t, 3>> schedule;
-    for (size_t j = 0; j < n; j++) {
-        if (H[j].empty()) break;
-        for (size_t i = 0; i < H[j].size(); i++) {
-            auto &B = H[j][i];  // The block (subblock) that we are currently working on
-            if (B.size() == 1) {    // Case 1. Schedule the unique job in the interval
-                schedule.push_back({B[i][0], B[i][1], B[i][2]});
-                continue;
-            }
-
-        }
-    }
 
     /*
      * Algorithm BLK-DE (Block decomposition)
@@ -206,4 +197,53 @@ int main() {
      *         return
      *     end
      */
+
+    for (size_t j = 0; j < n; j++) {
+        if (H[j].empty()) break;
+        for (size_t i = 0; i < H[j].size(); i++) {
+            Block &B = H[j][i];  // The block (subblock) that we are currently working on
+            if (B.size() == 1) {    // Case 1. Schedule the unique job in the interval
+                schedule.push_back({B[i][0], B[i][1], B[i][2]});
+                continue;
+            }
+
+            // Block decomposition
+            int u = 0;
+            Block &V = B;
+            int64_t L = t(V);
+            std::vector<std::array<int64_t, 3>> U;
+
+            // Step 2.
+            std::function<void()> step2 = [&]() -> void {
+                while (u < n) {
+                    if (V.size() == 1) {
+                        U.push_back(V[0]);
+                        // ToDo. reset t(V) to be the ending time of the second last subblock
+                    } else {
+
+                    }
+                }
+            };
+
+            std::function<void()> step3 = [&]() -> void {
+                int k = u;
+                while (L - t(V) > p) {
+
+                }
+            };
+        }
+    }
+
+    std::sort(schedule.begin(), schedule.end(),
+              [&](const std::array<int64_t, 3> &a, const std::array<int64_t, 3> &b) -> bool {
+                  return a[0] < b[0];
+              }
+    );
+
+    debug(schedule);
+
+    // The output is 1 based idx
+    for (const auto &[s, e, idx]: schedule) {
+        std::cout << s << " " << e << " " << idx + 1 << "\n";
+    }
 }
