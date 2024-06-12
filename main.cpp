@@ -252,6 +252,8 @@ int main() {
 
                         size_t start = H[j + 1].size();
 
+
+
                         // V is sorted in ERD rule therefore no need for extra sorting
                         for (size_t i = 0, k = 0; i < n; i = k) {
                             Block B(p);
