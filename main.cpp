@@ -332,6 +332,7 @@ int main() {
                     // Reset L = L - p
                     L = L - p;
 
+                    size_t bias = 0;
                     while (!U.empty()) {
                         // Make the ERD
                         std::sort(U.begin(), U.end(),
@@ -343,7 +344,7 @@ int main() {
                         u = U.size();
                         int64_t sum_lambda = 0;
                         for (k = 0; k < u; k++) {
-                            sum_lambda = sum_lambda + lambda[k][1] - lambda[k][0];
+                            sum_lambda = sum_lambda + lambda[k + bias][1] - lambda[k + bias][0];
                             if (d(U[k]) < t(V)) {
                                 // break from all loops and goto Step 2
                                 break_all_loops = 2;
@@ -368,6 +369,7 @@ int main() {
                             for (size_t l = k + 1; l < U.size(); l++) {
                                 U[l - k - 1] = U[l];
                             }
+                            bias = k + 1;
                             U.resize(U.size() - k);
                         }
                         if (break_all_loops > 0) break;
@@ -411,6 +413,15 @@ int main() {
     debug(schedule);
 
     assert(schedule.size() <= 10 * n);
+
+    int64_t tardiness = 0;
+    std::vector<int64_t> C(n);  // completion time
+    for (const auto &[s, e, idx]: schedule) {
+        C[idx] = std::max(C[idx], e);
+    }
+    for (size_t i = 0; i < n; i++) {
+        tardiness += std::max<int64_t>(0, C[jobs[i][2]] - jobs[i][1]);
+    }
 
     // The output is 1 based idx
     for (const auto &[s, e, idx]: schedule) {
