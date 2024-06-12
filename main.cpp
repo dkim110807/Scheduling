@@ -1,5 +1,5 @@
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -316,7 +316,9 @@ int main() {
                     H[j + 1].push_back(V);
                 } else {
                     // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
-
+                    for (int i = 0; i < U.size(); i++) {
+                        if (i == k) continue;
+                    }
                     // Schedule j_{k} within the rest \Delta and [t(V), L]
                 }
             };
