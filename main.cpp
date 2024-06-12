@@ -198,6 +198,9 @@ int main() {
      *     end
      */
 
+    // This is used in Algorithm BLK-DE - step 2, 3
+    std::vector<bool> optimal(n, false);
+
     for (size_t j = 0; j < n; j++) {
         if (H[j].empty()) break;
         for (size_t i = 0; i < H[j].size(); i++) {
@@ -208,7 +211,7 @@ int main() {
             }
 
             // Block decomposition
-            int u = 0;
+            size_t u = 0;
             Block &V = B;
             int64_t L = t(V);
             std::vector<std::array<int64_t, 3>> U;
@@ -220,16 +223,26 @@ int main() {
                         U.push_back(V[0]);
                         // ToDo. reset t(V) to be the ending time of the second last subblock
                     } else {
+                        std::array<int64_t, 3> ju{-1, -1, -1};
+                        // find the job j_{u} by the LDD rule
+                        for (size_t i = 0; i < V.size(); i++) {
 
+                        }
                     }
                 }
             };
 
+            // Step 3.
             std::function<void()> step3 = [&]() -> void {
-                int k = u;
+                size_t k = u;
                 while (L - t(V) > p) {
 
                 }
+            };
+
+            // Step 4.
+            std::function<void()> step4 = [&]() -> void {
+
             };
         }
     }
