@@ -172,6 +172,7 @@ int main() {
      *                u = u + 1
      *            end if
      *        end if
+     *    end
      * 3. Set k = u
      *    while L - t(V) > p:
      *        Schedule job j_{k} within [L - p, L]
@@ -192,6 +193,17 @@ int main() {
      *            else if \Lambda \geq L - t(V):
      *                break from all loops and goto Step 4.
      *            else:
-     *                Schedule {j_{1}, ..., j_{k}} within
+     *                Schedule {j_{1}, ..., j_{k}} within \Delta_{j = 1 ... k} and [L - \Lambda, L] by the ERD rule
+     *                Remove {j1, ..., j_{k}} from U
+     *            end
+     *        end
+     *    end
+     *  4. if V is not declared to be optimal:
+     *         Declare it to be optimal
+     *     else:
+     *         Schedule all jobs in U\{j_{k}} within \Delta_{j = 1 ... u} by the ERD rule
+     *         Schedule job j_{k} within the rest of \Delta_{u} and [t(V), L]
+     *         return
+     *     end
      */
 }
