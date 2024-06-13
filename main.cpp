@@ -369,8 +369,9 @@ int main() {
                             for (size_t l = k + 1; l < U.size(); l++) {
                                 U[l - k - 1] = U[l];
                             }
-                            bias = k + 1;
+                            bias += k + 1;
                             U.resize(U.size() - k);
+                            L -= sum_lambda;
                         }
                         if (break_all_loops > 0) break;
                     }
