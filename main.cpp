@@ -425,6 +425,7 @@ int main() {
     }
 
     // The output is 1 based idx
+    std::cout << tardiness << "\n";
     for (const auto &[s, e, idx]: schedule) {
         std::cout << s << " " << e << " " << idx + 1 << "\n";
     }
