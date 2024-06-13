@@ -216,6 +216,9 @@ int main() {
 
     for (size_t j = 0; j < n; j++) {
         if (H[j].empty()) break;
+
+        debug(H[j]);
+
         for (size_t i = 0; i < H[j].size(); i++) {
             Block &B = H[j][i];  // The block (subblock) that we are currently working on
             if (B.size() == 1) {    // Case 1. Schedule the unique job in the interval
@@ -258,22 +261,22 @@ int main() {
 
                         // V is sorted in ERD rule therefore no need for extra sorting
                         for (size_t i = 0, k = 0; i < V.size(); i = k) {
-                            Block B(p);
+                            Block sub(p);
                             if (k == ju[2]) k++;
-                            B.push_back(jobs[k]);
+                            sub.push_back(jobs[k]);
                             for (k++; k < V.size(); k++) {
                                 if (k == ju[2]) k++;
-                                if (t(B) > jobs[k][0]) {
-                                    B.push_back(jobs[k]);
+                                if (t(sub) > jobs[k][0]) {
+                                    sub.push_back(jobs[k]);
                                 } else break;
                             }
-                            H[j + 1].push_back(B);
+                            H[j + 1].push_back(sub);
                             if (i == 0) {
-                                int64_t left = r(V), right = r(B);
+                                int64_t left = r(V), right = r(sub);
                                 delta[u].push_back({left, right});
                                 Delta[u] += right - left;
                             } else {
-                                int64_t left = r(H[j + 1][H[j + 1].size() - 2]), right = r(B);
+                                int64_t left = r(H[j + 1][H[j + 1].size() - 2]), right = r(sub);
                                 delta[u].push_back({left, right});
                                 Delta[u] += right - left;
                             }
@@ -320,7 +323,7 @@ int main() {
             std::function<void()> step4;
 
             // Step 3.
-            size_t k = -1;
+            size_t k = -1, bias = 0;
             std::function<void()> step3 = [&]() -> void {
                 k = u;
                 int break_all_loops = 0;
@@ -332,7 +335,7 @@ int main() {
                     // Reset L = L - p
                     L = L - p;
 
-                    size_t bias = 0;
+                    bias = 0;
                     while (!U.empty()) {
                         // Make the ERD
                         std::sort(U.begin(), U.end(),
@@ -341,15 +344,15 @@ int main() {
                                   }
                         );
 
-                        u = U.size();
+                        u = U.size() + bias;
                         int64_t sum_lambda = 0;
-                        for (k = 0; k < u; k++) {
-                            sum_lambda = sum_lambda + lambda[k + bias][1] - lambda[k + bias][0];
-                            if (d(U[k]) < t(V)) {
+                        for (k = bias; k < u; k++) {
+                            sum_lambda = sum_lambda + lambda[k][1] - lambda[k][0];
+                            if (d(U[k - bias]) < t(V)) {
                                 // break from all loops and goto Step 2
                                 break_all_loops = 2;
                                 break;
-                            } else if (d(U[k]) >= L - sum_lambda) {
+                            } else if (d(U[k - bias]) >= L - sum_lambda) {
                                 break;
                             }
                         }
@@ -360,9 +363,23 @@ int main() {
                             break;
                         } else {
                             // Schedule {j_{1}, ..., j_{k}} within \bigcup_{l = 1}^{k} \Delta_{j} and [L - \Lambda, L] by ERD rule
-                            int64_t left = p, start = 0;
-                            for (size_t l = 0; l <= k; l++) {
-
+                            int64_t left, start = -1;
+                            for (size_t l = 0, o = bias, q = -1; l <= k - bias; l++) {
+                                left = p;
+                                while (start == -1) {
+                                    q += 1;
+                                    if (q > delta[o].size()) q = 0, o += 1;
+                                    start = delta[o][q][0];
+                                    if (delta[o][q][1] - start <= left) {
+                                        left -= (delta[0][q][1] - start);
+                                        start = -1;
+                                        schedule.push_back({start, delta[o][q][1], U[l][2]});
+                                    } else {
+                                        start = start + left;
+                                        schedule.push_back({start, start + left, U[l][2]});
+                                        break;
+                                    }
+                                }
                             }
 
                             // Remove {j_{1}, ..., j_{k}} from U
@@ -388,14 +405,30 @@ int main() {
                         optimal[V[i][2]] = true;
                     }
                     H[j + 1].push_back(V);
-                } else {
-                    // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
-                    for (int i = 0; i < U.size(); i++) {
-                        if (i == k) continue;
-
-                    }
-                    // Schedule j_{k} within the rest \Delta and [t(V), L]
                 }
+                // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
+                int64_t left, start = -1, sum = int64_t(u - 1) * p;
+                for (size_t l = 0, o = bias, q = -1; l <= u; l++) {
+                    if (l + bias == k) continue;
+                    left = p;
+                    while (start == -1) {
+                        q += 1;
+                        if (q > delta[o].size()) q = 0, o += 1;
+                        start = delta[o][q][0];
+                        if (delta[o][q][1] - start <= left) {
+                            left -= (delta[0][q][1] - start);
+                            start = -1;
+                            schedule.push_back({start, delta[o][q][1], U[l][2]});
+                        } else {
+                            start = start + left;
+                            schedule.push_back({start, start + left, U[l][2]});
+                            break;
+                        }
+                    }
+                }
+
+                // Schedule j_{k} within the rest \Delta and [t(V), L]
+
             };
 
             step2();
@@ -427,6 +460,7 @@ int main() {
     // The output is 1 based idx
     std::cout << tardiness << "\n";
     for (const auto &[s, e, idx]: schedule) {
-        std::cout << s << " " << e << " " << idx + 1 << "\n";
+        assert(s < e);
+        std::cout << s << " " << e - s << " " << idx + 1 << "\n";
     }
 }
