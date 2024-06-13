@@ -211,13 +211,13 @@ int main() {
      *     end
      */
 
-    // This is used in Algorithm BLK-DE - step 2, 3
-    std::vector<bool> optimal(n, false);
-
     for (size_t j = 0; j < n; j++) {
         if (H[j].empty()) break;
 
         debug(j, H[j]);
+
+        // This is used in Algorithm BLK-DE - step 2, 3
+        std::vector<bool> optimal(n, false);
 
         for (size_t i = 0; i < H[j].size(); i++) {
             Block &B = H[j][i];  // The block (subblock) that we are currently working on
@@ -304,8 +304,8 @@ int main() {
                         H[j + 1].pop_back();
 
                         for (size_t i = start; i < H[j + 1].size(); i++) {
-                            for (size_t k = 0; k < H[j + 1][start].size(); k++) {
-                                optimal[H[j + 1][start][k][2]] = true;
+                            for (size_t k = 0; k < H[j + 1][i].size(); k++) {
+                                optimal[H[j + 1][i][k][2]] = true;
                             }
                         }
 
@@ -436,6 +436,8 @@ int main() {
                     H[j + 1].push_back(V);
                 }
 
+                u = U.size();
+
                 // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
                 int64_t left, start = -1, sum = int64_t(u - 1) * p, o = (int64_t) bias, q = -1;
                 for (size_t l = 0; l < u; l++) {
@@ -461,32 +463,36 @@ int main() {
                     }
                 }
 
-                // Schedule j_{k} within the rest \Delta and [t(V), L]
-                for (size_t l = k - bias; l <= k - bias; l++) {
-                    left = p;
-                    while (left != 0) {
-                        if (start == -1) {
-                            q += 1;
-                            if (q >= delta[o].size()) q = 0, o += 1;
-                            if (o >= delta.size()) break;
-                            start = delta[o][q][0];
-                        }
-                        if (delta[o][q][1] - start <= left) {
-                            left -= (delta[o][q][1] - start);
-                            if (start != delta[o][q][1]) schedule.push_back({start, delta[o][q][1], U[l][2]});
-                            debug(schedule);
-                            start = -1;
-                        } else {
-                            schedule.push_back({start, start + left, U[l][2]});
-                            debug(schedule);
-                            start = start + left;
-                            break;
+                if (u != 0) {
+                    // Schedule j_{k} within the rest \Delta and [t(V), L]
+                    for (size_t l = k - bias; l <= k - bias; l++) {
+                        left = p;
+                        while (left != 0) {
+                            if (start == -1) {
+                                q += 1;
+                                if (q >= delta[o].size()) q = 0, o += 1;
+                                if (o >= delta.size()) break;
+                                start = delta[o][q][0];
+                            }
+                            if (delta[o][q][1] - start <= left) {
+                                left -= (delta[o][q][1] - start);
+                                if (start != delta[o][q][1]) schedule.push_back({start, delta[o][q][1], U[l][2]});
+                                debug(schedule);
+                                start = -1;
+                            } else {
+                                schedule.push_back({start, start + left, U[l][2]});
+                                debug(schedule);
+                                start = start + left;
+                                break;
+                            }
                         }
                     }
+                    assert(L - t(V) == left);
+                    schedule.push_back({t(V), L, U[k - bias][2]});
+                    debug(schedule);
                 }
-                assert(L - t(V) == left);
-                schedule.push_back({t(V), L, U[k - bias][2]});
-                debug(schedule);
+
+                U.clear();
             };
 
             step2();
