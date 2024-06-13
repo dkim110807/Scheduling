@@ -237,6 +237,10 @@ int main() {
             std::vector<std::array<int64_t, 2>> lambda; // \lambda
             std::vector<std::vector<std::array<int64_t, 2>>> delta; // Representing \delta_{i}
 
+
+            std::function<void()> step3;
+            std::function<void()> step4;
+
             // Step 2.
             std::function<void()> step2 = [&]() -> void {
                 while (u < n) {
@@ -260,6 +264,8 @@ int main() {
 
                         Delta.push_back(0);
                         delta.push_back({});
+
+                        debug(V);
 
                         // V is sorted in ERD rule therefore no need for extra sorting
                         for (size_t i = 0, k = 0; i < V.size(); i = k) {
@@ -303,6 +309,8 @@ int main() {
                         V = H[j + 1].back();
                         H[j + 1].pop_back();
 
+                        debug(V);
+
                         for (size_t i = start; i < H[j + 1].size(); i++) {
                             for (size_t k = 0; k < H[j + 1][i].size(); k++) {
                                 optimal[H[j + 1][i][k][2]] = true;
@@ -328,13 +336,13 @@ int main() {
 
                 debug(delta);
                 debug(lambda);
-            };
 
-            std::function<void()> step4;
+                step3();
+            };
 
             // Step 3.
             size_t k = -1, bias = 0;
-            std::function<void()> step3 = [&]() -> void {
+            step3 = [&]() -> void {
                 k = u;
 
                 debug(U);
@@ -425,6 +433,7 @@ int main() {
                 }
                 if (break_all_loops == 2) step2();
                 if (break_all_loops == 4) step4();
+                step4();
             };
 
             // Step 4.
@@ -496,8 +505,6 @@ int main() {
             };
 
             step2();
-            step3();
-            step4();
         }
 
         H[j].clear();
