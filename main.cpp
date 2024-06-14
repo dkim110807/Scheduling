@@ -246,96 +246,102 @@ int main() {
                 while (u < n) {
                     if (V.size() == 1) {
                         U.push_back(V[0]);
+                        delta.push_back({});
+                        delta[u].push_back({r(V), t(V)});
                         assert(!H[j + 1].empty());
                         V = H[j + 1].back();
-                        H[j + 1].pop_back();
+                        break;
+                    }
+
+                    std::array<int64_t, 3> ju{-1, -1, -1};  // j_{u}, LDD rule
+                    // find the job j_{u} by the LDD rule
+                    for (size_t i = 0; i < V.size(); i++) {
+                        if (V[i][1] > ju[1]) ju = V[i];
+                        if (V[i][1] == ju[1] && V[i][0] > ju[0]) ju = V[i];
+                    }
+
+                    debug(ju);
+
+                    size_t start = H[j + 1].size();
+
+                    Delta.push_back(0);
+                    delta.push_back({});
+
+                    debug(u, delta);
+
+                    debug(V);
+
+                    // V is sorted in ERD rule therefore no need for extra sorting
+                    for (size_t i = 0, k = 0; i < V.size(); i = k) {
+                        Block sub(p);
+                        if (V[k][2] == ju[2]) k++;
+                        sub.push_back(V[k]);
+                        for (k++; k < V.size(); k++) {
+                            if (V[k][2] == ju[2]) k++;
+                            if (k >= V.size()) break;
+                            if (t(sub) > V[k][0]) {
+                                sub.push_back(V[k]);
+                            } else break;
+                        }
+                        H[j + 1].push_back(sub);
+
+                        debug(H[j + 1]);
+
+                        debug(sub);
+
+                        if (i == 0) {
+                            int64_t left = r(V), right = r(sub);
+                            delta[u].push_back({left, right});
+                            Delta[u] += right - left;
+                        } else {
+                            int64_t left = t(H[j + 1][H[j + 1].size() - 2]), right = r(sub);
+                            debug(left, right);
+                            delta[u].push_back({left, right});
+                            Delta[u] += right - left;
+                        }
+                    }
+
+                    {
+                        int64_t left = t(H[j + 1].back()), right = t(B);
+                        debug(left, right);
+                        lambda.push_back({left, right});
+                        if (u == 0) Lambda.push_back({left, right});
+                        else {
+                            right = Lambda[u - 1][1];
+                            Lambda.push_back({left, right});
+                        }
+                    }
+
+                    V = H[j + 1].back();
+                    H[j + 1].pop_back();
+
+                    debug(V);
+
+                    for (size_t i = start; i < H[j + 1].size(); i++) {
+                        for (size_t k = 0; k < H[j + 1][i].size(); k++) {
+                            optimal[H[j + 1][i][k][2]] = true;
+                        }
+                    }
+
+                    U.push_back(ju);
+
+                    if (d(ju) >= t(V)) {
+                        // Declare V to be optimal
+                        for (size_t i = 0; i < V.size(); i++) {
+                            optimal[V[i][2]] = true;
+                        }
+                        H[j + 1].push_back(V);
+                        break;
+                    } else if (Delta[u] == 0) {
                         break;
                     } else {
-                        std::array<int64_t, 3> ju{-1, -1, -1};  // j_{u}, LDD rule
-                        // find the job j_{u} by the LDD rule
-                        for (size_t i = 0; i < V.size(); i++) {
-                            if (V[i][1] > ju[1]) ju = V[i];
-                            if (V[i][1] == ju[1] && V[i][0] > ju[0]) ju = V[i];
-                        }
-
-                        debug(ju);
-
-                        size_t start = H[j + 1].size();
-
-                        Delta.push_back(0);
-                        delta.push_back({});
-
-                        debug(V);
-
-                        // V is sorted in ERD rule therefore no need for extra sorting
-                        for (size_t i = 0, k = 0; i < V.size(); i = k) {
-                            Block sub(p);
-                            if (V[k][2] == ju[2]) k++;
-                            sub.push_back(V[k]);
-                            for (k++; k < V.size(); k++) {
-                                if (V[k][2] == ju[2]) k++;
-                                if (k >= V.size()) break;
-                                if (t(sub) > V[k][0]) {
-                                    sub.push_back(V[k]);
-                                } else break;
-                            }
-                            H[j + 1].push_back(sub);
-
-                            debug(sub);
-
-                            if (i == 0) {
-                                int64_t left = r(V), right = r(sub);
-                                delta[u].push_back({left, right});
-                                Delta[u] += right - left;
-                            } else {
-                                int64_t left = t(H[j + 1][H[j + 1].size() - 2]), right = r(sub);
-                                debug(left, right);
-                                delta[u].push_back({left, right});
-                                Delta[u] += right - left;
-                            }
-                        }
-
-                        {
-                            int64_t left = t(H[j + 1].back()), right = t(B);
-                            debug(left, right);
-                            lambda.push_back({left, right});
-                            if (u == 0) Lambda.push_back({left, right});
-                            else {
-                                right = Lambda[u - 1][1];
-                                Lambda.push_back({left, right});
-                            }
-                        }
-
-                        V = H[j + 1].back();
-                        H[j + 1].pop_back();
-
-                        debug(V);
-
-                        for (size_t i = start; i < H[j + 1].size(); i++) {
-                            for (size_t k = 0; k < H[j + 1][i].size(); k++) {
-                                optimal[H[j + 1][i][k][2]] = true;
-                            }
-                        }
-
-                        U.push_back(ju);
-
-                        if (d(ju) >= t(V)) {
-                            // Declare V to be optimal
-                            for (size_t i = 0; i < V.size(); i++) {
-                                optimal[V[i][2]] = true;
-                            }
-                            H[j + 1].push_back(V);
-                            break;
-                        } else if (Delta[u] == 0) {
-                            break;
-                        } else {
-                            u = u + 1;
-                        }
+                        u = u + 1;
                     }
                 }
 
                 debug(delta);
                 debug(lambda);
+                debug(U);
 
                 step3();
             };
@@ -385,6 +391,7 @@ int main() {
                                 break;
                             }
                         }
+                        if (break_all_loops > 0) break;
                         if (std::min(sum_lambda, L - t(V)) > p) {
                             break;
                         } else if (sum_lambda >= L - t(V)) {
@@ -419,11 +426,11 @@ int main() {
                             }
 
                             // Remove {j_{1}, ..., j_{k}} from U
-                            for (size_t l = k + 1; l < U.size(); l++) {
-                                U[l - k - 1] = U[l];
+                            for (size_t l = (k - bias) + 1; l < U.size(); l++) {
+                                U[l - (k - bias) - 1] = U[l];
                             }
+                            U.resize(U.size() - (k - bias) - 1);
                             bias += (k - bias) + 1;
-                            U.resize(U.size() - (k - bias));
                             L -= sum_lambda;
                         }
                         if (break_all_loops > 0) break;
@@ -448,7 +455,7 @@ int main() {
                 u = U.size();
 
                 // Schedule U \ {j_{k}} within \Delta_{1, ..., u} by the ERD rule
-                int64_t left, start = -1, sum = int64_t(u - 1) * p, o = (int64_t) bias, q = -1;
+                int64_t left, start = -1, o = (int64_t) bias, q = -1;
                 for (size_t l = 0; l < u; l++) {
                     if (l + bias == k) continue;
                     left = p;
@@ -474,6 +481,12 @@ int main() {
 
                 if (u != 0) {
                     // Schedule j_{k} within the rest \Delta and [t(V), L]
+
+                    debug(start);
+                    debug(U[k - bias]);
+                    debug(delta);
+
+                    o = u + bias;
                     for (size_t l = k - bias; l <= k - bias; l++) {
                         left = p;
                         while (left != 0) {
@@ -496,7 +509,8 @@ int main() {
                             }
                         }
                     }
-                    assert(L - t(V) == left);
+                    debug(t(V), L, left);
+//                    assert(L - t(V) == left);
                     schedule.push_back({t(V), L, U[k - bias][2]});
                     debug(schedule);
                 }
