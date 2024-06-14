@@ -250,6 +250,11 @@ int main() {
                         delta[u].push_back({r(V), t(V)});
                         assert(!H[j + 1].empty());
                         V = H[j + 1].back();
+
+                        debug(U);
+                        debug(V);
+                        debug(delta);
+
                         break;
                     }
 
