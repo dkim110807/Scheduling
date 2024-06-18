@@ -487,6 +487,7 @@ int main() {
                         if (start == -1) {
                             q += 1;
                             if (q >= delta[o].size()) q = 0, o += 1;
+                            assert(o < delta.size());
                             start = delta[o][q][0];
                         }
                         if (delta[o][q][1] - start <= left) {
