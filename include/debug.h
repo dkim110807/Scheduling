@@ -10,15 +10,6 @@
 #include <vector>
 #include <bitset>
 
-template<typename A, typename B>
-std::string to_string(std::pair<A, B> p);
-
-template<typename A, typename B, typename C>
-std::string to_string(std::tuple<A, B, C> p);
-
-template<typename A, typename B, typename C, typename D>
-std::string to_string(std::tuple<A, B, C, D> p);
-
 std::string to_string(const std::string &s) {
     return '"' + s + '"';
 }
@@ -39,6 +30,10 @@ std::string to_string(int64_t x) {
     return std::to_string(x);
 }
 
+std::string to_string(size_t x) {
+    return std::to_string(x);
+}
+
 std::string to_string(char x) {
     std::string s;
     s += x;
@@ -54,15 +49,6 @@ std::string to_string(const std::vector<bool> &v) {
         res += to_string(i);
     }
     res += "}";
-    return res;
-}
-
-template<size_t N>
-std::string to_string(std::bitset<N> v) {
-    std::string res;
-    for (size_t i = 0; i < N; i++) {
-        res += static_cast<char>('0' + v[i]);
-    }
     return res;
 }
 
@@ -90,22 +76,6 @@ std::string to_string(A v) {
     }
     res += "}";
     return res;
-}
-
-template<typename A, typename B>
-std::string to_string(std::pair<A, B> p) {
-    return "(" + to_string(p.first) + ", " + to_string(p.second) + ")";
-}
-
-template<typename A, typename B, typename C>
-std::string to_string(std::tuple<A, B, C> p) {
-    return "(" + to_string(std::get<0>(p)) + ", " + to_string(std::get<1>(p)) + ", " + to_string(std::get<2>(p)) + ")";
-}
-
-template<typename A, typename B, typename C, typename D>
-std::string to_string(std::tuple<A, B, C, D> p) {
-    return "(" + to_string(std::get<0>(p)) + ", " + to_string(std::get<1>(p)) + ", " + to_string(std::get<2>(p)) +
-           ", " + to_string(std::get<3>(p)) + ")";
 }
 
 void debug_out() { std::cerr << std::endl; }
