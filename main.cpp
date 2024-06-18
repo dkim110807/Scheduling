@@ -534,7 +534,7 @@ int main() {
                         }
                     }
                     debug(tV, L, left);
-//                    assert(L - t(V) == left);
+//                    assert(L - tV == left);
                     schedule.push_back({tV, L, U[k - bias][2]});
                     debug(schedule);
                 }
