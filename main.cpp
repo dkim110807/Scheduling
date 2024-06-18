@@ -511,7 +511,7 @@ int main() {
                     debug(U[k - bias]);
                     debug(delta);
 
-                    o = u + bias;
+                    o = k;
                     for (int64_t l = k - bias; l <= k - bias; l++) {
                         left = p;
                         while (left != 0) {
@@ -535,7 +535,7 @@ int main() {
                         }
                     }
                     debug(tV, L, left);
-//                    assert(L - tV == left);
+                    assert(L - tV == left);
                     schedule.push_back({tV, L, U[k - bias][2]});
                     debug(schedule);
                 }
